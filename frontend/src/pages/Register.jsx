@@ -1,7 +1,8 @@
 function Register() {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md">
+    <div className="flex items-center justify-center min-h-screen bg-cover bg-center" style={{backgroundImage: "url('/welcome.jpg')"}}>
+
+      <div className="bg-gray-200 p-8 rounded-2xl shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
         <form className="space-y-4">
           <div>
@@ -28,6 +29,14 @@ function Register() {
               placeholder="Enter your password"
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
+            <input
+              type="password"
+              className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Confirm Password"
+            />
+          </div>
           <button
             type="submit"
             className="w-full bg-green-600 text-white p-2 rounded-md hover:bg-green-700 transition"
@@ -37,7 +46,7 @@ function Register() {
         </form>
         <p className="text-sm text-center mt-4">
           Already have an account?{" "}
-          <a href="/" className="text-blue-600 hover:underline">
+          <a href="/login" className="text-blue-600 hover:underline">
             Login
           </a>
         </p>

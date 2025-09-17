@@ -1,7 +1,7 @@
 function Login() {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md">
+    <div className="flex items-center justify-center min-h-screen bg-cover bg-center" style={{backgroundImage: "url('/welcome.jpg')"}}>
+      <div className="bg-gray-200 p-8 rounded-2xl shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
         <form className="space-y-4">
           <div>

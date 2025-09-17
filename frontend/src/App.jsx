@@ -6,12 +6,14 @@ import Products from "./pages/Products";
 import Sales from "./pages/Sales";
 import Report from "./pages/Report";
 import Layout from "./components/Layout";
+import Landing from "./pages/Landing";
 
 function App() {
   return(
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
         <Route element={<Layout />}>

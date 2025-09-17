@@ -13,5 +13,8 @@
   "description": "",
   "devDependencies": {
     "concurrently": "^9.2.1"
+  },
+  "dependencies": {
+    "framer-motion": "^12.23.13"
   }
 }
