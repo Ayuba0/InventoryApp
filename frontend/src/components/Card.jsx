@@ -1,14 +1,9 @@
-function Card({ title, value, icon }) {
-    return (
-      <div className="bg-white rounded shadow p-6 flex items-center space-x-4 hover:shadow-lg transition">
-        <div className="text-3xl">{icon}</div>
-        <div>
-          <p className="text-gray-500">{title}</p>
-          <p className="text-xl font-bold">{value}</p>
-        </div>
-      </div>
-    );
-  }
-  
-  export default Card;
-  
+// Card.jsx
+export default function Card({ title, children }) {
+  return (
+    <div className="bg-white shadow-md rounded-lg p-4">
+      <h3 className="text-lg font-semibold mb-2">{title}</h3>
+      {children}
+    </div>
+  );
+}

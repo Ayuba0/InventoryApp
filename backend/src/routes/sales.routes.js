@@ -1,5 +1,6 @@
 import express from "express";
 import db from "../config/db.js";
+import ExcelJS from "exceljs";
 
 const router = express.Router();
 
@@ -27,7 +28,8 @@ router.post("/", (req, res) => {
     const total_price = product.price * quantity_sold;
 
     // Step 3: Insert into sales
-    const insertSaleSql = "INSERT INTO sales (product_id, quantity_sold, total_price, cashier_id, date) VALUES (?, ?, ?, ?, NOW())";
+    const insertSaleSql =
+      "INSERT INTO sales (product_id, quantity_sold, total_price, cashier_id, date) VALUES (?, ?, ?, ?, NOW())";
     db.query(insertSaleSql, [product_id, quantity_sold, total_price, cashier_id], (err, result) => {
       if (err) return res.status(500).json({ message: "Error recording sale" });
 
@@ -44,18 +46,84 @@ router.post("/", (req, res) => {
   });
 });
 
-// ✅ Get all sales
+// ✅ Get all sales with cashier name
 router.get("/", (req, res) => {
   const sql = `
-    SELECT sales.id, products.name AS product_name, sales.quantity_sold, sales.total_price, sales.cashier_id, sales.date
+    SELECT 
+      sales.id, 
+      products.name AS product_name, 
+      sales.quantity_sold, 
+      sales.total_price, 
+      sales.cashier_id, 
+      users.name AS cashier_name, 
+      sales.date
     FROM sales
     JOIN products ON sales.product_id = products.id
+    JOIN users ON sales.cashier_id = users.id
     ORDER BY sales.date DESC
   `;
   db.query(sql, (err, results) => {
     if (err) return res.status(500).json({ message: "Database error" });
     res.json(results);
   });
+});
+
+// ✅ Export sales to Excel with cashier name
+router.get("/export", async (req, res) => {
+  try {
+    const sql = `
+      SELECT 
+        sales.id, 
+        products.name AS product_name, 
+        sales.quantity_sold, 
+        sales.total_price, 
+        sales.cashier_id, 
+        users.name AS cashier_name, 
+        sales.date
+      FROM sales
+      JOIN products ON sales.product_id = products.id
+      JOIN users ON sales.cashier_id = users.id
+      ORDER BY sales.date DESC
+    `;
+    db.query(sql, async (err, results) => {
+      if (err) return res.status(500).json({ message: "Database error" });
+
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Sales Report");
+
+      // Define headers
+      worksheet.columns = [
+        { header: "Sale ID", key: "id", width: 10 },
+        { header: "Product", key: "product_name", width: 25 },
+        { header: "Quantity Sold", key: "quantity_sold", width: 15 },
+        { header: "Total Price", key: "total_price", width: 15 },
+        { header: "Cashier", key: "cashier_name", width: 20 },
+        { header: "Date", key: "date", width: 25 },
+      ];
+
+      // Add rows
+      results.forEach((row) => worksheet.addRow(row));
+
+      // Style header row
+      worksheet.getRow(1).font = { bold: true };
+
+      // Send Excel file
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=Sales_Report.xlsx"
+      );
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+
+      await workbook.xlsx.write(res);
+      res.end();
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error exporting sales" });
+  }
 });
 
 export default router;

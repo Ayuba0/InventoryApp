@@ -14,11 +14,13 @@ function Sidebar({ role }) {
     { name: "Recent Transactions", path: "/report" },
   ];
 
+  // Default to cashier if role is missing
   const links = role === "manager" ? managerLinks : cashierLinks;
+  const displayRole = role?.toUpperCase() || "USER";
 
   return (
     <div className="w-64 bg-gray-800 text-white min-h-screen p-6 space-y-6">
-      <h2 className="text-2xl font-bold mb-6">{role.toUpperCase()}</h2>
+      <h2 className="text-2xl font-bold mb-6">{displayRole}</h2>
       <nav className="flex flex-col space-y-2">
         {links.map((link) => (
           <Link

@@ -4,68 +4,77 @@ import ExcelJS from "exceljs";
 
 const router = express.Router();
 
-// Utility: create Excel and send response
-async function exportToExcel(res, reportName, columns, rows) {
-  const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet(reportName);
+// Helper to get sales data by filter
+const getSalesData = (filter, callback) => {
+  let dateCondition = "";
+  if (filter === "daily") {
+    dateCondition = "WHERE DATE(sales.date) = CURDATE()";
+  } else if (filter === "weekly") {
+    dateCondition = "WHERE YEARWEEK(sales.date, 1) = YEARWEEK(CURDATE(), 1)";
+  }
 
-  worksheet.columns = columns;
-  rows.forEach(row => worksheet.addRow(row));
-
-  res.setHeader(
-    "Content-Type",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-  );
-  res.setHeader(
-    "Content-Disposition",
-    `attachment; filename=${reportName}.xlsx`
-  );
-
-  await workbook.xlsx.write(res);
-  res.end();
-}
-
-// ✅ Daily Sales Report
-router.get("/daily", (req, res) => {
   const sql = `
-    SELECT p.name AS product_name, s.quantity, s.total, s.sold_at
-    FROM sales s
-    JOIN products p ON s.product_id = p.id
-    WHERE DATE(s.sold_at) = CURDATE()
-    ORDER BY s.sold_at DESC
+    SELECT sales.id,
+           products.name AS product_name,
+           sales.quantity_sold,
+           sales.total_price,
+           users.name AS cashier_name,
+           sales.date
+    FROM sales
+    JOIN products ON sales.product_id = products.id
+    JOIN users ON sales.cashier_id = users.id
+    ${dateCondition}
+    ORDER BY sales.date DESC
   `;
 
-  db.query(sql, async (err, results) => {
-    if (err) return res.status(500).json({ message: "Database error" });
+  db.query(sql, (err, results) => {
+    if (err) return callback(err, null);
+    callback(null, results);
+  });
+};
 
-    await exportToExcel(res, "daily_sales_report", [
-      { header: "Product", key: "product_name", width: 25 },
-      { header: "Quantity Sold", key: "quantity", width: 15 },
-      { header: "Total Price", key: "total", width: 15 },
-      { header: "Date", key: "sold_at", width: 20 },
-    ], results);
+// --- JSON route for table preview ---
+router.get("/preview/:type", (req, res) => {
+  const { type } = req.params;
+  getSalesData(type, (err, sales) => {
+    if (err) return res.status(500).json({ message: "Database error" });
+    if (!sales || sales.length === 0) return res.json([]);
+    res.json(sales);
   });
 });
 
-// ✅ Weekly Sales Report
-router.get("/weekly", (req, res) => {
-  const sql = `
-    SELECT p.name AS product_name, s.quantity, s.total, s.sold_at
-    FROM sales s
-    JOIN products p ON s.product_id = p.id
-    WHERE YEARWEEK(s.sold_at, 1) = YEARWEEK(CURDATE(), 1)
-    ORDER BY s.sold_at DESC
-  `;
-
-  db.query(sql, async (err, results) => {
+// --- Excel route for download ---
+router.get("/download/:type", (req, res) => {
+  const { type } = req.params;
+  getSalesData(type, async (err, sales) => {
     if (err) return res.status(500).json({ message: "Database error" });
 
-    await exportToExcel(res, "weekly_sales_report", [
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet(`${type.toUpperCase()} Sales Report`);
+
+    worksheet.columns = [
+      { header: "Sale ID", key: "id", width: 10 },
       { header: "Product", key: "product_name", width: 25 },
-      { header: "Quantity Sold", key: "quantity", width: 15 },
-      { header: "Total Price", key: "total", width: 15 },
-      { header: "Date", key: "sold_at", width: 20 },
-    ], results);
+      { header: "Quantity Sold", key: "quantity_sold", width: 15 },
+      { header: "Total Price", key: "total_price", width: 15 },
+      { header: "Cashier", key: "cashier_name", width: 20 },
+      { header: "Date", key: "date", width: 25 },
+    ];
+
+    sales.forEach((sale) => worksheet.addRow(sale));
+    worksheet.getRow(1).font = { bold: true };
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=${type}_sales_report.xlsx`
+    );
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
   });
 });
 
