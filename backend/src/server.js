@@ -1,11 +1,16 @@
+import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import db from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import productsRoutes from "./routes/products.routes.js";
+import salesRoutes from "./routes/sales.routes.js";
+import salesReportRoutes from "./routes/salesReport.routes.js";
 
 dotenv.config();
+
+
 
 const app = express();
 
@@ -21,6 +26,9 @@ app.get("/", (req, res) => {
 // User routes
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/products", productsRoutes);
+app.use("/api/sales", salesRoutes);
+app.use("/api/sales-report", salesReportRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;

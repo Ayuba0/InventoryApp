@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import db from "../config/db.js";
 
+
 const router = express.Router();
 
 // REGISTER route
@@ -51,6 +52,8 @@ router.post("/login", (req, res) => {
     // compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid email or password" });
+
+
 
     // generate JWT
     const token = jwt.sign(
