@@ -3,14 +3,21 @@ import ManagerDashboard from "./ManagerDashboard";
 import CashierDashboard from "./CashierDashboard";
 
 function Dashboard() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    // Always load from localStorage at start
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
 
   useEffect(() => {
-    // Get user info from localStorage (after login we store it)
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    // Re-check user info every time the token changes
+    const handleStorageChange = () => {
+      const updatedUser = localStorage.getItem("user");
+      setUser(updatedUser ? JSON.parse(updatedUser) : null);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   if (!user) {
@@ -19,11 +26,9 @@ function Dashboard() {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">
-        Welcome {user.name} ({user.role})
-      </h2>
+      
 
-      {user.role === "manager" ? <ManagerDashboard /> : <CashierDashboard />}
+      {user.role === "manager" ? <ManagerDashboard user={user} /> : <CashierDashboard user={user} />}
     </div>
   );
 }

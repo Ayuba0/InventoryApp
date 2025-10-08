@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import {
+  CurrencyDollarIcon,
+  ShoppingCartIcon,
+  ReceiptPercentIcon,
+} from "@heroicons/react/24/solid";
 import Navbar from "../components/Navbar";
-import Card from "../components/Card";
-import { CurrencyDollarIcon, ShoppingCartIcon, ReceiptPercentIcon } from "@heroicons/react/24/solid";
 
 export default function CashierDashboard({ user }) {
   const [recentSales, setRecentSales] = useState([]);
@@ -21,19 +24,18 @@ export default function CashierDashboard({ user }) {
       );
       const sales = res.data || [];
 
-      // Recent transactions: latest 10
+      // Sort and slice
       const sortedSales = sales
         .sort((a, b) => new Date(b.date) - new Date(a.date))
         .slice(0, 10);
       setRecentSales(sortedSales);
 
-      // Summary calculations
+      // Summary
       const totalRevenue = sales.reduce(
         (sum, s) => sum + Number(s.total_price || 0),
         0
       );
-      const totalTransactions = sales.length;
-      setSummary({ totalRevenue, totalTransactions });
+      setSummary({ totalRevenue, totalTransactions: sales.length });
     } catch (err) {
       console.error("Error fetching sales data:", err);
       setRecentSales([]);
@@ -49,83 +51,114 @@ export default function CashierDashboard({ user }) {
   const totalRevenueRounded = Math.ceil(summary.totalRevenue / 1000) * 1000;
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-     
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+      <div className="max-w-7xl mx-auto mt-6">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">
+            
+            <span className="text-blue-600">{user?.name || "Cashier"}</span>
+          </h1>
+          <p className="text-gray-500 mt-2">
+            Here’s an overview of today’s sales performance.
+          </p>
+        </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card title="Today's Revenue" className="flex items-center gap-4 p-6">
-          <CurrencyDollarIcon className="h-12 w-12 text-green-500" />
-          <div>
-            <span className="text-gray-500 font-semibold">Today's Revenue</span>
-            <p className="text-2xl font-bold text-green-600">
-              ₦{totalRevenueRounded.toLocaleString()}
-            </p>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Revenue Card */}
+          <div className="bg-white hover:shadow-lg transition rounded-2xl p-6 border border-gray-100 flex items-center gap-4">
+            <div className="bg-green-100 p-3 rounded-full">
+              <CurrencyDollarIcon className="h-8 w-8 text-green-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 font-semibold">
+                Total Revenue
+              </p>
+              <h2 className="text-2xl font-bold text-green-700">
+                ₦{totalRevenueRounded.toLocaleString()}
+              </h2>
+            </div>
           </div>
-        </Card>
 
-        <Card
-          title="Number of Transactions"
-          className="flex items-center gap-4 p-6"
-        >
-          <ShoppingCartIcon className="h-12 w-12 text-blue-500" />
-          <div>
-            <span className="text-gray-500 font-semibold">Transactions</span>
-            <p className="text-2xl font-bold text-blue-600">
-              {summary.totalTransactions.toLocaleString()}
-            </p>
+          {/* Transactions Card */}
+          <div className="bg-white hover:shadow-lg transition rounded-2xl p-6 border border-gray-100 flex items-center gap-4">
+            <div className="bg-blue-100 p-3 rounded-full">
+              <ShoppingCartIcon className="h-8 w-8 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 font-semibold">
+                Transactions
+              </p>
+              <h2 className="text-2xl font-bold text-blue-700">
+                {summary.totalTransactions.toLocaleString()}
+              </h2>
+            </div>
           </div>
-        </Card>
 
-        <Card title="Quick Access" className="flex items-center gap-4 p-6">
-          <ReceiptPercentIcon className="h-12 w-12 text-purple-500" />
-          <div>
-            <span className="text-gray-500 font-semibold">Process Sale</span>
-            <p className="text-2xl font-bold text-purple-600">Quick Access</p>
+          {/* Quick Access Card */}
+          <div className="bg-white hover:shadow-lg transition rounded-2xl p-6 border border-gray-100 flex items-center gap-4 cursor-pointer">
+            <div className="bg-purple-100 p-3 rounded-full">
+              <ReceiptPercentIcon className="h-8 w-8 text-purple-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500 font-semibold">Quick Access</p>
+              <h2 className="text-2xl font-bold text-purple-700">
+                Process Sale
+              </h2>
+            </div>
           </div>
-        </Card>
-      </div>
+        </div>
 
-      {/* Recent Transactions Table */}
-      <div className="mt-8">
-        <h2 className="text-2xl font-semibold mb-4">Recent Transactions</h2>
-        <div className="overflow-x-auto bg-white rounded shadow p-4">
-          {loading ? (
-            <p>Loading transactions...</p>
-          ) : (
-            <table className="min-w-full table-auto">
-              <thead>
-                <tr className="bg-gray-200 text-left">
-                  <th className="px-4 py-2">Product</th>
-                  <th className="px-4 py-2">Quantity</th>
-                  <th className="px-4 py-2">Total</th>
-                  <th className="px-4 py-2">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentSales.length === 0 ? (
+        {/* Recent Transactions Table */}
+        <div className="mt-10 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-800">
+              Recent Transactions
+            </h2>
+          </div>
+
+          <div className="overflow-x-auto">
+            {loading ? (
+              <div className="p-6 text-center text-gray-500">
+                Loading transactions...
+              </div>
+            ) : recentSales.length === 0 ? (
+              <div className="p-6 text-center text-gray-500">
+                No transactions found
+              </div>
+            ) : (
+              <table className="min-w-full text-sm text-gray-700">
+                <thead className="bg-gray-100">
                   <tr>
-                    <td colSpan="4" className="text-center py-4">
-                      No transactions found
-                    </td>
+                    <th className="px-6 py-3 text-left font-semibold">Product</th>
+                    <th className="px-6 py-3 text-left font-semibold">Quantity</th>
+                    <th className="px-6 py-3 text-left font-semibold">Total</th>
+                    <th className="px-6 py-3 text-left font-semibold">Date</th>
                   </tr>
-                ) : (
-                  recentSales.map((sale, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50">
-                      <td className="border px-4 py-2">{sale.product_name}</td>
-                      <td className="border px-4 py-2">{sale.quantity_sold}</td>
-                      <td className="border px-4 py-2">
+                </thead>
+                <tbody>
+                  {recentSales.map((sale, idx) => (
+                    <tr
+                      key={idx}
+                      className={`${
+                        idx % 2 === 0 ? "bg-white" : "bg-gray-50"
+                      } hover:bg-blue-50 transition`}
+                    >
+                      <td className="px-6 py-3 border-t">{sale.product_name}</td>
+                      <td className="px-6 py-3 border-t">{sale.quantity_sold}</td>
+                      <td className="px-6 py-3 border-t font-semibold text-green-600">
                         ₦{Number(sale.total_price).toLocaleString()}
                       </td>
-                      <td className="border px-4 py-2">
+                      <td className="px-6 py-3 border-t text-gray-500">
                         {new Date(sale.date).toLocaleDateString()}
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          )}
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
       </div>
     </div>

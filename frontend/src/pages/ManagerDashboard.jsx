@@ -125,9 +125,6 @@ export default function ManagerDashboard({ user }) {
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      <h2 className="text-3xl font-bold mb-6">
-        Welcome {user?.name || "Manager"} (Manager Dashboard)
-      </h2>
 
       {/* Filter */}
       <div className="flex items-center gap-4 mb-6">

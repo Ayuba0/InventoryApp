@@ -23,6 +23,7 @@ function Login() {
 
       // Navigate to dashboard (Dashboard.jsx will check the role)
       navigate("/dashboard");
+      window.location.reload();
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
     }

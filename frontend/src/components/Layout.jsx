@@ -1,35 +1,80 @@
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
-function Layout(){
-    return(
+function Layout() {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
 
-        <div className="flex h-screen" >
-            {/* Sidebar */}
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    } else {
+      navigate("/login"); // Redirect if not logged in
+    }
+  }, [navigate]);
 
-            <aside className="w-64 bg-gray-800 text-white flex flex-col">
-                <h2 className="text-2xl font-bold p-4 border-b border-gray-700">Inventory App</h2>
-                <nav className="flex-1 p-4">
-                    <ul className="space-y-2">
-                        <li><Link to="/dashboard" className="block p-2 rounded hover:bg-gray-700"> Dashbord</Link></li>
-                        <li><Link to="/products" className="block p-2 rounded hover:bg-gray-700">Products</Link></li>
-                        <li><Link to="/sales" className="block p-2 rounded hover:bg-gray-700">Sales</Link></li>
-                        <li><Link to="/report" className="block p-2 rounded hover:bg-gray-700">Report</Link></li>
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login", { replace: true });
+  };
 
-                    </ul>
-                </nav>
-            </aside>
+  // Sidebar links based on role
+  const managerLinks = [
+    { name: "Dashboard", path: "/dashboard" },
+    { name: "Products", path: "/products" },
+    { name: "Sales", path: "/sales" },
+    { name: "Reports", path: "/report" },
+  ];
 
-            {/* Main content */}
-            <main className="flex-1 bg-gray-100 p-6 overflow-y-auto">
-                <header className="flex justify-between items-center bg-white p-4 shadow rounded mb-6">
-                    <h1 className="text-xl font-bold">Dashboard</h1>
-                    <button className="bg-red-600 text-white px-4 py-2 rounded">Logout</button>
-                </header>
-                <Outlet />
-            </main>
-        </div>
-    )
+  const cashierLinks = [
+    { name: "Dashboard", path: "/dashboard" },
+    { name: "Process Sale", path: "/sales" },
+    { name: "Recent Transactions", path: "/report" },
+  ];
 
+  const links = user?.role === "manager" ? managerLinks : cashierLinks;
+
+  return (
+    <div className="flex h-screen">
+      {/* Sidebar */}
+      <aside className="w-64 bg-purple-800 text-white flex flex-col">
+        <h2 className="text-2xl font-bold p-4 border-b border-gray-700">
+          {user ? `${user.role.toUpperCase()} PANEL` : "INVENTORY APP"}
+        </h2>
+        <nav className="flex-1 p-4">
+          <ul className="space-y-2">
+            {links.map((link) => (
+              <li key={link.name}>
+                <Link
+                  to={link.path}
+                  className="block p-2 rounded hover:bg-gray-700 transition"
+                >
+                  {link.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 bg-gray-100 p-6 overflow-y-auto">
+        <header className="flex justify-between items-center bg-white p-4 shadow rounded mb-6">
+          <h1 className="text-xl font-bold">
+            Welcome, {user ? user.name : "User"}
+          </h1>
+          <button
+            onClick={handleLogout}
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+          >
+            Logout
+          </button>
+        </header>
+        <Outlet />
+      </main>
+    </div>
+  );
 }
 
 export default Layout;

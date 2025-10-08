@@ -19,10 +19,12 @@ router.post("/register", async (req, res) => {
     // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    const validRole = role === "manager" ? "manager" : "cashier"; // default to cashier if invalid role
+
     // insert into DB
     db.query(
       "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
-      [name, email, hashedPassword, role],
+      [name, email, hashedPassword, validRole],
       (err, result) => {
         if (err) {
           console.error(err);
@@ -67,7 +69,7 @@ router.post("/login", (req, res) => {
       token,
       user: {
         id: user.id,
-        username: user.name,
+        name: user.name,
         email: user.email,
         role: user.role,
       },
