@@ -6,7 +6,7 @@ function Landing(){
         <div className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-8 py-4 shadow-md bg-white">
   {/* Logo + Title */}
   <div className="flex items-center gap-2">
-    <img src="" alt="Inventory Logo" className="h-8 w-8 object-contain" />
+    <img src="/LOGO.png" alt="Inventory Logo" className="h-10 w-10 object-contain" />
     <span className="text-xl font-bold text-gray-800">Invento</span>
   </div>
 
@@ -53,7 +53,7 @@ function Landing(){
   </div>
 </section>
 
-  <section className=" px-10 py-16 bg-gray-100 text-center">
+  <section className=" px-10 py-16 bg-blue-300 text-center">
   <h2 className="text-3xl font-bold text-gray-800 mb-4">Invento</h2>
   <p className="max-w-3xl mx-auto text-gray-600 text-lg leading-relaxed">
 At Invento, we offer a complete solution for managing your stock with ease
@@ -68,7 +68,7 @@ At Invento, we offer a complete solution for managing your stock with ease
 
 
   {/* Features Section */}
-<section className="grid md:grid-cols-3 gap-8 px-10 py-16 bg-white">
+<section className="grid md:grid-cols-3 gap-8 px-10 py-16 bg-blue-200">
   {/* Item Management */}
   <div className="flex flex-col items-center text-center p-6 rounded-xl shadow hover:shadow-lg transition">
     <img
@@ -115,7 +115,7 @@ At Invento, we offer a complete solution for managing your stock with ease
 
     {/* Services */}
 
-<section id="services" className="px-10 py-20 bg-gray-100 text-center">
+<section id="services" className="px-10 py-20 bg-blue-100 text-center">
   <h2 className="text-3xl font-bold text-gray-800 mb-6">Why Choose Invento?</h2>
   <p className="max-w-3xl mx-auto text-gray-600 text-lg leading-relaxed mb-8">
     Our inventory management system helps businesses stay organized, save time, 
